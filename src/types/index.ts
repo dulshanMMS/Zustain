@@ -66,7 +66,7 @@ export interface ApiError {
 }
 
 // Muscle categories for filtering
-export type MuscleCategory = 
+export type MuscleCategory =
   | 'abdominals'
   | 'biceps'
   | 'calves'

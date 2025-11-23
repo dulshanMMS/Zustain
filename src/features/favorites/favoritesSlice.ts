@@ -18,7 +18,7 @@ const favoritesSlice = createSlice({
     toggleFavorite: (state, action: PayloadAction<Exercise>) => {
       const favoriteExercise = toFavoriteExercise(action.payload);
       const index = state.items.findIndex(item => item.id === favoriteExercise.id);
-      
+
       if (index !== -1) {
         // Remove from favorites
         state.items.splice(index, 1);
