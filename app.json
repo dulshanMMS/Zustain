@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "WellnessHub",
-    "slug": "WellnessHub",
+    "name": "Zustain",
+    "slug": "zustain",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
