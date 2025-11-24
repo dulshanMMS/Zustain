@@ -46,6 +46,7 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
   ExerciseDetails: { exercise: Exercise };
+  ActiveWorkout: undefined;
 };
 
 export type AuthStackParamList = {
@@ -55,6 +56,7 @@ export type AuthStackParamList = {
 
 export type MainTabParamList = {
   Home: undefined;
+  Activity: undefined;
   Favorites: undefined;
   Profile: undefined;
 };

@@ -1,0 +1,12 @@
+export { HomeScreen } from './HomeScreen';
+export { FavoritesScreen } from './FavoritesScreen';
+export { ProfileScreen } from './ProfileScreen';
+export { LoginScreen } from './LoginScreen';
+export { RegisterScreen } from './RegisterScreen';
+export { ExerciseDetailsScreen } from './ExerciseDetailsScreen';
+export { ActivityScreen } from './ActivityScreen';
+export { ActiveWorkoutScreen } from './ActiveWorkoutScreen';
+export { WorkoutInsightsScreen } from './WorkoutInsightsScreen';
+export { StatsScreen } from './StatsScreen';
+export { WorkoutsScreen } from './WorkoutsScreen';
+export { WaterTrackingScreen } from './WaterTrackingScreen';

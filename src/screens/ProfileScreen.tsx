@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,17 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import { ConfirmModal, EditProfileModal } from '../components';
 import { useTheme } from '../theme';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { logout } from '../features/auth/authSlice';
+import { persistor } from '../store';
+import { logout, updateUser } from '../features/auth/authSlice';
 import { clearFavorites } from '../features/favorites/favoritesSlice';
-import { addWater, removeWater } from '../features/water/waterSlice';
+import { addWater, removeWater, resetDaily } from '../features/water/waterSlice';
+import { resetDailyStats, clearWorkoutHistory } from '../features/workout/workoutSlice';
 import { authStorage } from '../features/auth/authStorage';
 
 interface ProfileScreenProps {
@@ -26,6 +29,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
   const user = useAppSelector((state: any) => state.auth.user);
   const favoritesCount = useAppSelector((state: any) => state.favorites.items.length);
   const waterData = useAppSelector((state: any) => state.water);
+  const workoutHistory = useAppSelector((state: any) => state.workout.workoutHistory);
+  const workoutCount = workoutHistory?.length || 0;
+  
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showClearDataModal, setShowClearDataModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   
   const waterPercentage = Math.min((waterData.consumed / waterData.dailyGoal) * 100, 100);
   const glassesConsumed = Math.floor(waterData.consumed / 250); // 250ml per glass
@@ -40,44 +49,57 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await authStorage.clearAll();
-            dispatch(logout());
-            onLogout();
-          },
-        },
-      ]
-    );
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    await authStorage.clearAll();
+    dispatch(logout());
+    setShowLogoutModal(false);
+    onLogout();
   };
 
   const handleClearData = () => {
-    Alert.alert(
-      'Clear All Data',
-      'This will remove all your favorites. This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: () => dispatch(clearFavorites()),
-        },
-      ]
-    );
+    setShowClearDataModal(true);
+  };
+
+  const handleConfirmClearData = async () => {
+    // Clear all data from Redux
+    dispatch(clearFavorites());
+    dispatch(resetDaily());
+    dispatch(clearWorkoutHistory());
+    
+    // Purge persisted storage to ensure clean state
+    await persistor.purge();
+    await persistor.flush();
+    
+    // Force a small delay to ensure persistence completes
+    setTimeout(() => {
+      setShowClearDataModal(false);
+    }, 100);
+  };
+
+  const handleSaveProfile = (firstName: string, lastName: string, email: string) => {
+    dispatch(updateUser({ firstName, lastName, email }));
+    setShowEditModal(false);
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+        <LinearGradient
+          colors={[colors.primary, '#66BB6A', colors.primary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
+          <TouchableOpacity 
+            style={styles.editButton}
+            onPress={() => setShowEditModal(true)}
+          >
+            <Feather name="edit-2" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
           <View style={styles.profileImageContainer}>
             <View style={[styles.profileImage, { backgroundColor: colors.white }]}>
               <Text style={[styles.profileInitial, { color: colors.primary }]}>
@@ -89,7 +111,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
             {user?.firstName} {user?.lastName}
           </Text>
           <Text style={styles.userEmail}>{user?.email}</Text>
-        </View>
+        </LinearGradient>
 
         {/* Stats Section */}
         <View style={styles.statsContainer}>
@@ -101,7 +123,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
           
           <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Feather name="activity" size={24} color={colors.primary} />
-            <Text style={[styles.statValue, { color: colors.text }]}>0</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{workoutCount}</Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Workouts</Text>
           </View>
           
@@ -248,13 +270,47 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
         {/* App Info */}
         <View style={styles.appInfo}>
           <Text style={[styles.appInfoText, { color: colors.textLight }]}>
-            WellnessHub v1.0.0
+            Zustain v1.0.0
           </Text>
           <Text style={[styles.appInfoText, { color: colors.textLight }]}>
             Health & Wellness Tracker
           </Text>
         </View>
       </ScrollView>
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        visible={showLogoutModal}
+        title="Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleConfirmLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        confirmColor={colors.error}
+      />
+
+      {/* Clear Data Confirmation Modal */}
+      <ConfirmModal
+        visible={showClearDataModal}
+        title="Clear All Data"
+        message="This will remove all your favorites. This action cannot be undone."
+        confirmText="Clear"
+        cancelText="Cancel"
+        onConfirm={handleConfirmClearData}
+        onCancel={() => setShowClearDataModal(false)}
+        confirmColor={colors.error}
+      />
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        visible={showEditModal}
+        currentFirstName={user?.firstName || ''}
+        currentLastName={user?.lastName || ''}
+        currentEmail={user?.email || ''}
+        onSave={handleSaveProfile}
+        onCancel={() => setShowEditModal(false)}
+      />
     </View>
   );
 };
@@ -265,77 +321,107 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 48,
+    paddingBottom: 52,
     alignItems: 'center',
   },
-  profileImageContainer: {
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+  editButton: {
+    position: 'absolute',
+    top: 60,
+    right: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 4,
-    borderColor: 'rgba(255,255,255,0.3)',
+    zIndex: 10,
+  },
+  profileImageContainer: {
+    marginBottom: 24,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 5,
+    borderColor: 'rgba(255,255,255,0.35)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
   profileInitial: {
-    fontSize: 48,
-    fontWeight: '800',
+    fontSize: 52,
+    fontWeight: '900',
   },
   userName: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 32,
+    fontWeight: '900',
     color: '#FFFFFF',
-    marginBottom: 6,
-    letterSpacing: -0.5,
+    marginBottom: 8,
+    letterSpacing: -1,
   },
   userEmail: {
-    fontSize: 15,
+    fontSize: 16,
     color: 'rgba(255,255,255,0.85)',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   statsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 24,
-    marginTop: -24,
-    gap: 14,
+    paddingHorizontal: 20,
+    marginTop: -28,
+    justifyContent: 'space-between',
   },
   statCard: {
     flex: 1,
+    marginHorizontal: 6,
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 24,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: '800',
-    marginTop: 10,
+    fontSize: 32,
+    fontWeight: '900',
+    marginTop: 12,
   },
   statLabel: {
-    fontSize: 13,
-    marginTop: 6,
-    fontWeight: '600',
+    fontSize: 12,
+    marginTop: 8,
+    fontWeight: '700',
+    opacity: 0.7,
   },
   section: {
-    marginTop: 28,
-    paddingHorizontal: 24,
+    marginTop: 32,
+    paddingHorizontal: 28,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 16,
+    fontSize: 22,
+    fontWeight: '900',
+    marginBottom: 18,
+    letterSpacing: -0.5,
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 18,
-    borderRadius: 18,
-    borderWidth: 1,
-    marginBottom: 14,
+    padding: 20,
+    borderRadius: 20,
+    borderWidth: 0,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -343,116 +429,138 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 18,
   },
   settingTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
   },
   settingSubtitle: {
-    fontSize: 13,
-    marginTop: 3,
-    fontWeight: '500',
+    fontSize: 14,
+    marginTop: 4,
+    fontWeight: '600',
+    opacity: 0.7,
   },
   actionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 18,
-    borderRadius: 18,
-    borderWidth: 1,
-    marginBottom: 14,
+    padding: 20,
+    borderRadius: 20,
+    borderWidth: 0,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   actionContent: {
     flex: 1,
   },
   appInfo: {
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: 48,
   },
   appInfoText: {
-    fontSize: 13,
-    marginBottom: 6,
-    fontWeight: '500',
+    fontSize: 14,
+    marginBottom: 8,
+    fontWeight: '600',
+    opacity: 0.5,
   },
   waterCard: {
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 1,
+    borderRadius: 24,
+    padding: 28,
+    borderWidth: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   waterHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   waterHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   waterIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 18,
   },
   waterTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  waterSubtitle: {
-    fontSize: 13,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  waterAmount: {
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: '800',
   },
+  waterSubtitle: {
+    fontSize: 14,
+    marginTop: 5,
+    fontWeight: '600',
+    opacity: 0.7,
+  },
+  waterAmount: {
+    fontSize: 32,
+    fontWeight: '900',
+  },
   progressBarContainer: {
-    height: 10,
-    borderRadius: 5,
+    height: 12,
+    borderRadius: 6,
     overflow: 'hidden',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   progressBarFill: {
     height: '100%',
-    borderRadius: 5,
+    borderRadius: 6,
   },
   progressText: {
-    fontSize: 13,
+    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 20,
-    fontWeight: '600',
+    marginBottom: 24,
+    fontWeight: '700',
+    opacity: 0.7,
   },
   waterActions: {
     flexDirection: 'row',
-    gap: 10,
+    justifyContent: 'space-between',
   },
   waterButton: {
     flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 10,
-    borderRadius: 16,
-    borderWidth: 2,
+    marginHorizontal: 6,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    borderRadius: 18,
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   waterButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    marginTop: 6,
+    fontSize: 15,
+    fontWeight: '800',
+    marginTop: 8,
   },
   waterButtonSubtext: {
-    fontSize: 11,
-    marginTop: 3,
-    fontWeight: '600',
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: '700',
+    opacity: 0.8,
   },
 });
+

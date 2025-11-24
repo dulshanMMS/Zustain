@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthNavigator } from './AuthNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
 import { ExerciseDetailsScreen } from '../screens/ExerciseDetailsScreen';
+import { ActiveWorkoutScreen } from '../screens/ActiveWorkoutScreen';
 import { RootStackParamList } from '../types';
 import { useAppSelector } from '../store/hooks';
 import { Loading } from '../components/Loading';
@@ -34,6 +35,8 @@ export const RootNavigator: React.FC = () => {
     } catch (error) {
       console.error('Error checking auth status:', error);
     } finally {
+      // Add minimum delay to show loading screen
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setIsLoading(false);
     }
   };
@@ -52,7 +55,11 @@ export const RootNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator 
+        screenOptions={{ 
+          headerShown: false,
+        }}
+      >
         {!isAuthenticated ? (
           <Stack.Screen name="Auth">
             {(props) => <AuthNavigator {...props} onLoginSuccess={handleLoginSuccess} />}
@@ -65,6 +72,13 @@ export const RootNavigator: React.FC = () => {
             <Stack.Screen 
               name="ExerciseDetails" 
               component={ExerciseDetailsScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen 
+              name="ActiveWorkout" 
+              component={ActiveWorkoutScreen}
               options={{
                 headerShown: false,
               }}

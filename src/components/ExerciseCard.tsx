@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme';
 import { Exercise } from '../types';
@@ -17,10 +18,10 @@ interface ExerciseCardProps {
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
   showFavoriteButton?: boolean;
+  fullWidth?: boolean;
 }
 
 const { width } = Dimensions.get('window');
-const cardWidth = (width - 48) / 2; // 2 columns with padding
 
 export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   exercise,
@@ -28,6 +29,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   isFavorite = false,
   onToggleFavorite,
   showFavoriteButton = true,
+  fullWidth = false,
 }) => {
   const { colors } = useTheme();
 
@@ -44,10 +46,24 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }
   };
 
+  const getDifficultyGradient = (difficulty: string): [string, string] => {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner':
+        return ['#81C784', '#66BB6A'];
+      case 'intermediate':
+        return ['#FFB74D', '#FFA726'];
+      case 'expert':
+        return ['#E57373', '#EF5350'];
+      default:
+        return [colors.textSecondary, colors.textSecondary];
+    }
+  };
+
   return (
     <TouchableOpacity
       style={[
         styles.card,
+        fullWidth && styles.cardFullWidth,
         {
           backgroundColor: colors.surface,
           borderColor: colors.border,
@@ -76,21 +92,16 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
       {/* Content */}
       <View style={styles.content}>
         {/* Difficulty Badge */}
-        <View
-          style={[
-            styles.difficultyBadge,
-            { backgroundColor: getDifficultyColor(exercise.difficulty) + '20' },
-          ]}
+        <LinearGradient
+          colors={getDifficultyGradient(exercise.difficulty)}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.difficultyBadge}
         >
-          <Text
-            style={[
-              styles.difficultyText,
-              { color: getDifficultyColor(exercise.difficulty) },
-            ]}
-          >
+          <Text style={styles.difficultyText}>
             {formatDifficulty(exercise.difficulty)}
           </Text>
-        </View>
+        </LinearGradient>
 
         {/* Exercise Name */}
         <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
@@ -129,55 +140,75 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    width: cardWidth,
-    borderRadius: 20,
-    padding: 16,
+    width: (width - 64) / 2,
+    borderRadius: 24,
+    padding: 18,
     marginBottom: 16,
-    borderWidth: 1,
+    borderWidth: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  cardFullWidth: {
+    width: '100%',
   },
   favoriteButton: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    top: 14,
+    right: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
   },
   content: {
-    marginTop: 6,
+    marginTop: 8,
   },
   difficultyBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
     alignSelf: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   difficultyText: {
     fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'capitalize',
-    letterSpacing: 0.3,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
   title: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '800',
-    marginBottom: 12,
-    minHeight: 42,
-    lineHeight: 22,
+    marginBottom: 14,
+    minHeight: 44,
+    lineHeight: 23,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   infoText: {
-    fontSize: 13,
-    marginLeft: 8,
+    fontSize: 14,
+    marginLeft: 10,
     textTransform: 'capitalize',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

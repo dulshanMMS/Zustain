@@ -95,7 +95,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, onLoginSuc
         {/* Header */}
         <View style={styles.header}>
           <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
-            <Feather name="activity" size={48} color={colors.primary} />
+            <Feather name="activity" size={56} color={colors.primary} />
           </View>
           <Text style={[styles.title, { color: colors.text }]}>Welcome Back</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -147,19 +147,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, onLoginSuc
             loading={loading}
             style={styles.loginButton}
           />
-
-          {/* Demo Credentials */}
-          <View style={[styles.demoBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.demoTitle, { color: colors.textSecondary }]}>
-              Demo Credentials:
-            </Text>
-            <Text style={[styles.demoText, { color: colors.text }]}>
-              Username: emilys
-            </Text>
-            <Text style={[styles.demoText, { color: colors.text }]}>
-              Password: emilyspass
-            </Text>
-          </View>
         </View>
 
         {/* Footer */}
@@ -187,24 +174,34 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 48,
+    paddingTop: 20,
   },
   iconContainer: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 8,
+    fontSize: 36,
+    fontWeight: '900',
+    marginBottom: 12,
+    letterSpacing: -1,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
     textAlign: 'center',
+    lineHeight: 24,
+    fontWeight: '500',
+    paddingHorizontal: 20,
   },
   form: {
     marginBottom: 24,
@@ -213,19 +210,26 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   demoBox: {
-    marginTop: 24,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
+    marginTop: 28,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   demoTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 12,
+    letterSpacing: 0.3,
   },
   demoText: {
-    fontSize: 14,
-    marginBottom: 4,
+    fontSize: 15,
+    marginBottom: 6,
+    fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',

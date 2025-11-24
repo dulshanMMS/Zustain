@@ -122,7 +122,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRe
           </View>
           <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Join WellnessHub and start your health journey
+            Join Zustain and start your health journey
           </Text>
         </View>
 
@@ -295,11 +295,12 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
     marginBottom: 0,
   },
   halfWidth: {
     flex: 1,
+    marginHorizontal: 6,
   },
   registerButton: {
     marginTop: 8,

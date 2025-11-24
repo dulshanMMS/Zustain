@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
+  Animated,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme';
@@ -43,9 +45,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [dailyTip, setDailyTip] = useState<WellnessTip>(getTipOfTheDay());
   const favorites = useAppSelector((state) => state.favorites.items);
   const user = useAppSelector((state) => state.auth.user);
+  const waterData = useAppSelector((state: any) => state.water);
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  // Fade in animation on mount
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  // Calculate water percentage and favorites count
+  const waterPercentage = Math.min((waterData.consumed / waterData.dailyGoal) * 100, 100);
+  const favoritesCount = favorites.length;
+  
+  // Get workout statistics
+  const workoutData = useAppSelector((state: any) => state.workout);
+  const todayCalories = workoutData.totalCaloriesToday || 0;
+  const todayMinutes = workoutData.totalMinutesToday || 0;
+  const workoutCount = workoutData.workoutHistory?.length || 0;
 
   // Fetch exercises based on selected category
   const { data: exercises, isLoading, error, refetch } = useGetExercisesByMuscleQuery(selectedCategory);
+
+  // Show better error message for API issues
+  const apiError = error as any;
+  const isApiKeyError = apiError?.status === 400 || apiError?.status === 401 || apiError?.status === 403;
 
   const handleExercisePress = (exercise: Exercise) => {
     navigation.navigate('ExerciseDetails', { exercise });
@@ -79,6 +106,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           size={24}
           color={isSelected ? '#FFFFFF' : item.color}
         />
+        <View style={{ width: 12 }} />
         <Text
           style={[
             styles.categoryName,
@@ -98,13 +126,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       isFavorite={isFavorite(item)}
       onToggleFavorite={() => handleToggleFavorite(item)}
       showFavoriteButton
+      fullWidth
     />
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <Animated.View style={[styles.container, { backgroundColor: colors.background, opacity: fadeAnim }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.surface }]}>
+      <LinearGradient
+        colors={[colors.surface, colors.background]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.header}
+      >
         <View>
           <Text style={[styles.greeting, { color: colors.textSecondary }]}>
             Welcome back,
@@ -118,15 +152,85 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             {user?.firstName?.charAt(0) || 'U'}
           </Text>
         </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Today's Stats Summary */}
+        <View style={styles.statsSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text, marginLeft: 24, marginBottom: 16 }]}>
+            Today's Progress
+          </Text>
+          <View style={styles.statsGrid}>
+            <LinearGradient
+              colors={['#FF6B6B', '#FF8E8E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.statCard}
+            >
+              <View style={styles.statIconContainer}>
+                <Feather name="zap" size={28} color="#FFFFFF" />
+              </View>
+              <Text style={styles.statValue}>{todayCalories}</Text>
+              <Text style={styles.statLabel}>Calories Burned</Text>
+              <Text style={styles.statSubLabel}>Today</Text>
+            </LinearGradient>
+
+            <LinearGradient
+              colors={['#4ECDC4', '#6FE3DB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.statCard}
+            >
+              <View style={styles.statIconContainer}>
+                <Feather name="clock" size={28} color="#FFFFFF" />
+              </View>
+              <Text style={styles.statValue}>{todayMinutes}</Text>
+              <Text style={styles.statLabel}>Minutes</Text>
+              <Text style={styles.statSubLabel}>Exercised</Text>
+            </LinearGradient>
+          </View>
+
+          <View style={styles.statsGrid}>
+            <LinearGradient
+              colors={['#45B7D1', '#68C5DB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.statCard}
+            >
+              <View style={styles.statIconContainer}>
+                <Feather name="droplet" size={28} color="#FFFFFF" />
+              </View>
+              <Text style={styles.statValue}>{Math.round(waterPercentage)}%</Text>
+              <Text style={styles.statLabel}>Water Goal</Text>
+              <Text style={styles.statSubLabel}>{waterData.consumed}ml</Text>
+            </LinearGradient>
+
+            <LinearGradient
+              colors={['#BB8FCE', '#D2A8E0']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.statCard}
+            >
+              <View style={styles.statIconContainer}>
+                <Feather name="activity" size={28} color="#FFFFFF" />
+              </View>
+              <Text style={styles.statValue}>{workoutCount}</Text>
+              <Text style={styles.statLabel}>Workouts</Text>
+              <Text style={styles.statSubLabel}>Completed</Text>
+            </LinearGradient>
+          </View>
+        </View>
+
         {/* Wellness Tip of the Day */}
         <View style={styles.tipSection}>
-          <View style={[styles.tipCard, { 
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
-          }]}>
+          <LinearGradient
+            colors={['#4CAF50', '#66BB6A']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.tipCard, { 
+              shadowColor: colors.primary,
+            }]}
+          >
             <View style={styles.tipHeader}>
               <View style={styles.tipIconContainer}>
                 <Feather name={dailyTip.icon as any} size={24} color="#FFFFFF" />
@@ -137,7 +241,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </View>
             <Text style={styles.tipTitle}>{dailyTip.title}</Text>
             <Text style={styles.tipDescription}>{dailyTip.description}</Text>
-          </View>
+          </LinearGradient>
         </View>
 
         {/* Categories */}
@@ -165,7 +269,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Loading />
           ) : error ? (
             <ErrorView
-              message="Failed to load exercises. Please try again."
+              message={isApiKeyError 
+                ? "⚠️ API Key Error: Please add your API Ninjas key in src/features/exercises/exerciseApi.ts\n\nGet a FREE key at api-ninjas.com" 
+                : "Failed to load exercises. Please try again."}
               onRetry={refetch}
             />
           ) : (
@@ -173,8 +279,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               data={exercises}
               renderItem={renderExerciseItem}
               keyExtractor={(item, index) => `${item.name}-${index}`}
-              numColumns={2}
-              columnWrapperStyle={styles.exerciseRow}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.exercisesList}
               scrollEnabled={false}
@@ -190,7 +294,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -204,128 +308,205 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
     paddingTop: 60,
+    paddingBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   greeting: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '600',
+    opacity: 0.7,
   },
   userName: {
-    fontSize: 28,
-    fontWeight: '800',
-    marginTop: 6,
-    letterSpacing: -0.5,
+    fontSize: 32,
+    fontWeight: '900',
+    marginTop: 4,
+    letterSpacing: -1,
   },
   profileCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   profileInitial: {
     color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 24,
+    fontWeight: '900',
   },
   categoriesSection: {
-    marginTop: 24,
+    marginTop: 28,
   },
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 24,
+    fontWeight: '900',
     marginLeft: 24,
-    marginBottom: 16,
-    letterSpacing: -0.3,
+    marginBottom: 18,
+    letterSpacing: -0.5,
   },
   categoriesList: {
     paddingHorizontal: 24,
   },
   categoryCard: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 16,
-    marginRight: 12,
-    borderWidth: 1.5,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 20,
+    marginRight: 14,
+    borderWidth: 0,
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
   },
   categoryName: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
   },
   exercisesSection: {
     flex: 1,
-    marginTop: 28,
+    marginTop: 32,
   },
   exerciseRow: {
     justifyContent: 'space-between',
     paddingHorizontal: 24,
   },
   exercisesList: {
-    paddingBottom: 20,
+    paddingBottom: 24,
+    paddingHorizontal: 24,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
   },
   emptyText: {
-    fontSize: 16,
-    marginTop: 16,
+    fontSize: 17,
+    marginTop: 18,
+    fontWeight: '600',
   },
   tipSection: {
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   tipCard: {
-    padding: 24,
-    borderRadius: 24,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
+    padding: 28,
+    borderRadius: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 10,
   },
   tipHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   tipIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   tipBadge: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 16,
   },
   tipBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '900',
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 1,
   },
   tipTitle: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 24,
+    fontWeight: '900',
     color: '#FFFFFF',
-    marginBottom: 10,
-    letterSpacing: -0.3,
+    marginBottom: 12,
+    letterSpacing: -0.5,
   },
   tipDescription: {
-    fontSize: 15,
+    fontSize: 16,
     color: 'rgba(255,255,255,0.95)',
-    lineHeight: 22,
+    lineHeight: 24,
     fontWeight: '500',
+  },
+  statsSection: {
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  statCard: {
+    width: '48%',
+    padding: 20,
+    borderRadius: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  statIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  statValue: {
+    fontSize: 36,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 8,
+    letterSpacing: -1,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  statLabel: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  statSubLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.85)',
+    marginTop: 2,
   },
 });

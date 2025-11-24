@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme';
 
 interface ButtonProps {
@@ -97,18 +98,59 @@ export const Button: React.FC<ButtonProps> = ({
     };
   };
 
+  const getGradientColors = (): [string, string] => {
+    switch (variant) {
+      case 'primary':
+        return ['#4CAF50', '#66BB6A'];
+      case 'secondary':
+        return ['#2196F3', '#42A5F5'];
+      default:
+        return [colors.primary, colors.primary];
+    }
+  };
+
+  if (variant === 'outline') {
+    return (
+      <TouchableOpacity
+        style={[getButtonStyle(), style]}
+        onPress={onPress}
+        disabled={disabled || loading}
+        activeOpacity={0.7}
+      >
+        {loading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+        )}
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <TouchableOpacity
-      style={[getButtonStyle(), style]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
+      style={[{ borderRadius: 16 }, style]}
     >
-      {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? colors.primary : colors.white} />
-      ) : (
-        <Text style={[getTextStyle(), textStyle]}>{title}</Text>
-      )}
+      <LinearGradient
+        colors={getGradientColors()}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[getButtonStyle(), { 
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          elevation: 8,
+        }]}
+      >
+        {loading ? (
+          <ActivityIndicator color={colors.white} />
+        ) : (
+          <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+        )}
+      </LinearGradient>
     </TouchableOpacity>
   );
 };

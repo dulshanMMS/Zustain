@@ -1,10 +1,54 @@
 # Zustain - Health & Wellness Tracker
 
+> ⚠️ **IMPORTANT:** Before running the app, you need to add your API Ninjas key!  
+> See [API_CONFIG.md](./API_CONFIG.md) for quick 2-minute setup.
+
 **IN3210 Mobile Applications Development - Assignment 2**  
 **Domain:** Health & Wellness (Index Last Digit: 6)  
 **App Theme:** FitBuddy - Track exercises, water intake, and wellness tips
 
 A comprehensive React Native mobile application for tracking exercises and managing wellness routines, built following industry best practices and standards.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
+- Expo CLI
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/dulshanMMS/Zustain.git
+   cd Zustain
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **⚠️ ADD YOUR API KEY (Required!)**
+   - Open `src/features/exercises/exerciseApi.ts`
+   - Get FREE API key from: https://api-ninjas.com/
+   - Replace `YOUR_API_KEY_HERE` with your actual key
+   - See [API_CONFIG.md](./API_CONFIG.md) for detailed instructions
+
+4. **Start the app**
+   ```bash
+   npm start
+   ```
+   Then press:
+   - `w` for web
+   - `a` for Android
+   - `i` for iOS
+
+### Test Credentials
+- Username: `emilys`
+- Password: `emilyspass`
 
 ---
 

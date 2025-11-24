@@ -14,6 +14,7 @@ import { useTheme } from '../theme';
 import { Button } from '../components';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleFavorite } from '../features/favorites/favoritesSlice';
+import { startWorkout } from '../features/workout/workoutSlice';
 import { RootStackParamList } from '../types';
 import { formatDifficulty, formatMuscleName, generateExerciseId } from '../utils/helpers';
 
@@ -38,6 +39,11 @@ export const ExerciseDetailsScreen: React.FC<ExerciseDetailsScreenProps> = ({ na
 
   const handleToggleFavorite = () => {
     dispatch(toggleFavorite(exercise));
+  };
+
+  const handleStartWorkout = () => {
+    dispatch(startWorkout({ exerciseName: exercise.name }));
+    navigation.navigate('ActiveWorkout');
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -144,9 +150,15 @@ export const ExerciseDetailsScreen: React.FC<ExerciseDetailsScreenProps> = ({ na
         {/* Action Button */}
         <View style={styles.actionSection}>
           <Button
+            title="Start Workout"
+            onPress={handleStartWorkout}
+            variant="primary"
+          />
+          <View style={{ height: 16 }} />
+          <Button
             title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
             onPress={handleToggleFavorite}
-            variant={isFavorite ? 'outline' : 'primary'}
+            variant={isFavorite ? 'outline' : 'outline'}
           />
         </View>
       </ScrollView>
@@ -160,7 +172,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 50,
-    paddingBottom: 24,
+    paddingBottom: 20,
     paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -168,7 +180,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFFFFF',
     flex: 1,
     textAlign: 'center',
@@ -186,92 +198,111 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   titleSection: {
-    padding: 24,
-    paddingTop: 20,
+    padding: 28,
+    paddingTop: 24,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '800',
-    marginBottom: 16,
-    letterSpacing: -0.5,
+    fontSize: 34,
+    fontWeight: '900',
+    marginBottom: 18,
+    letterSpacing: -1,
   },
   difficultyBadge: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 24,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    borderRadius: 20,
     alignSelf: 'flex-start',
   },
   difficultyText: {
     fontSize: 15,
-    fontWeight: '700',
-    textTransform: 'capitalize',
-    letterSpacing: 0.5,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   infoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 24,
-    gap: 16,
+    paddingHorizontal: 28,
+    justifyContent: 'space-between',
   },
   infoCard: {
-    width: (width - 64) / 2,
-    padding: 20,
-    borderRadius: 20,
-    borderWidth: 1,
+    width: (width - 74) / 2,
+    marginBottom: 18,
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 0,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   infoLabel: {
     fontSize: 13,
-    marginBottom: 6,
-    fontWeight: '500',
+    marginBottom: 8,
+    fontWeight: '600',
+    opacity: 0.7,
   },
   infoValue: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     textAlign: 'center',
     textTransform: 'capitalize',
   },
   instructionsSection: {
-    padding: 24,
-    marginTop: 12,
+    padding: 28,
+    marginTop: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    marginLeft: 12,
+    fontSize: 24,
+    fontWeight: '900',
+    marginLeft: 14,
+    letterSpacing: -0.5,
   },
   instructionsCard: {
-    padding: 20,
-    borderRadius: 20,
-    borderWidth: 1,
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   instructionsText: {
-    fontSize: 16,
-    lineHeight: 26,
+    fontSize: 17,
+    lineHeight: 28,
+    fontWeight: '500',
   },
   actionSection: {
-    paddingHorizontal: 24,
-    marginTop: 16,
+    paddingHorizontal: 28,
+    marginTop: 20,
   },
 });

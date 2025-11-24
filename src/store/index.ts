@@ -14,13 +14,14 @@ import { exerciseApi } from '../features/exercises/exerciseApi';
 import authReducer from '../features/auth/authSlice';
 import favoritesReducer from '../features/favorites/favoritesSlice';
 import waterReducer from '../features/water/waterSlice';
+import workoutReducer from '../features/workout/workoutSlice';
 
 // Persist config
 const persistConfig = {
   key: 'root',
   version: 1,
   storage: AsyncStorage,
-  whitelist: ['auth', 'favorites', 'water'], // Persist auth, favorites, and water
+  whitelist: ['auth', 'favorites', 'water', 'workout'], // Persist auth, favorites, water, and workout
 };
 
 // Combine reducers
@@ -29,6 +30,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   favorites: favoritesReducer,
   water: waterReducer,
+  workout: workoutReducer,
 });
 
 // Create persisted reducer
