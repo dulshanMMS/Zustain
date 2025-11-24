@@ -23,8 +23,12 @@ export const authService = {
         throw new Error(error.message || 'Login failed');
       }
 
-      const data: AuthResponse = await response.json();
-      return data;
+      const data = await response.json();
+      // DummyJSON returns accessToken, map to token
+      return {
+        ...data,
+        token: data.accessToken || data.token,
+      };
     } catch (error) {
       if (error instanceof Error) {
         throw error;
@@ -82,8 +86,11 @@ export const authService = {
         throw new Error('Failed to get user data');
       }
 
-      const data: AuthResponse = await response.json();
-      return data;
+      const data = await response.json();
+      return {
+        ...data,
+        token: data.accessToken || data.token,
+      };
     } catch (error) {
       if (error instanceof Error) {
         throw error;

@@ -7,7 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../theme';
 
 interface ButtonProps {
   title: string;
@@ -34,7 +34,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getButtonStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      borderRadius: 12,
+      borderRadius: 16,
       justifyContent: 'center',
       alignItems: 'center',
       flexDirection: 'row',
@@ -42,9 +42,9 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Size styles
     const sizeStyles: Record<string, ViewStyle> = {
-      small: { paddingVertical: 8, paddingHorizontal: 16 },
-      medium: { paddingVertical: 14, paddingHorizontal: 24 },
-      large: { paddingVertical: 18, paddingHorizontal: 32 },
+      small: { paddingVertical: 10, paddingHorizontal: 18 },
+      medium: { paddingVertical: 16, paddingHorizontal: 28 },
+      large: { paddingVertical: 20, paddingHorizontal: 36 },
     };
 
     // Variant styles
@@ -72,14 +72,15 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getTextStyle = (): TextStyle => {
     const baseStyle: TextStyle = {
-      fontWeight: '600',
+      fontWeight: '700',
+      letterSpacing: 0.3,
     };
 
     // Size styles
     const sizeStyles: Record<string, TextStyle> = {
       small: { fontSize: 14 },
-      medium: { fontSize: 16 },
-      large: { fontSize: 18 },
+      medium: { fontSize: 17 },
+      large: { fontSize: 19 },
     };
 
     // Variant styles

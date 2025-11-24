@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,15 +10,14 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
-import { useTheme } from '../../theme/ThemeContext';
-import { ExerciseCard } from '../../components/ExerciseCard';
-import { Loading } from '../../components/Loading';
-import { ErrorView } from '../../components/ErrorView';
-import { useGetExercisesByMuscleQuery } from '../../features/exercises/exerciseApi';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { toggleFavorite } from '../../features/favorites/favoritesSlice';
-import { RootStackParamList, CategoryItem, MuscleCategory, Exercise } from '../../types';
-import { generateExerciseId } from '../../utils/helpers';
+import { useTheme } from '../theme';
+import { ExerciseCard, Loading, ErrorView } from '../components';
+import { useGetExercisesByMuscleQuery } from '../features/exercises/exerciseApi';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { toggleFavorite } from '../features/favorites/favoritesSlice';
+import { RootStackParamList, CategoryItem, MuscleCategory, Exercise } from '../types';
+import { generateExerciseId } from '../utils/helpers';
+import { getTipOfTheDay, WellnessTip } from '../data/wellnessTips';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -41,6 +40,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { colors, isDark } = useTheme();
   const dispatch = useAppDispatch();
   const [selectedCategory, setSelectedCategory] = useState<MuscleCategory>('chest');
+  const [dailyTip, setDailyTip] = useState<WellnessTip>(getTipOfTheDay());
   const favorites = useAppSelector((state) => state.favorites.items);
   const user = useAppSelector((state) => state.auth.user);
 
@@ -120,62 +120,76 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Categories */}
-      <View style={styles.categoriesSection}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Categories
-        </Text>
-        <FlatList
-          data={categories}
-          renderItem={renderCategoryItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesList}
-        />
-      </View>
-
-      {/* Exercises List */}
-      <View style={styles.exercisesSection}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {categories.find((c) => c.muscle === selectedCategory)?.name} Exercises
-        </Text>
-
-        {isLoading ? (
-          <Loading />
-        ) : error ? (
-          <ErrorView
-            message="Failed to load exercises. Please try again."
-            onRetry={refetch}
-          />
-        ) : (
-          <FlatList
-            data={exercises}
-            renderItem={renderExerciseItem}
-            keyExtractor={(item, index) => `${item.name}-${index}`}
-            numColumns={2}
-            columnWrapperStyle={styles.exerciseRow}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.exercisesList}
-            refreshControl={
-              <RefreshControl
-                refreshing={isLoading}
-                onRefresh={refetch}
-                colors={[colors.primary]}
-                tintColor={colors.primary}
-              />
-            }
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Feather name="inbox" size={64} color={colors.textLight} />
-                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                  No exercises found
-                </Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Wellness Tip of the Day */}
+        <View style={styles.tipSection}>
+          <View style={[styles.tipCard, { 
+            backgroundColor: colors.primary,
+            shadowColor: colors.primary,
+          }]}>
+            <View style={styles.tipHeader}>
+              <View style={styles.tipIconContainer}>
+                <Feather name={dailyTip.icon as any} size={24} color="#FFFFFF" />
               </View>
-            }
+              <View style={styles.tipBadge}>
+                <Text style={styles.tipBadgeText}>Tip of the Day</Text>
+              </View>
+            </View>
+            <Text style={styles.tipTitle}>{dailyTip.title}</Text>
+            <Text style={styles.tipDescription}>{dailyTip.description}</Text>
+          </View>
+        </View>
+
+        {/* Categories */}
+        <View style={styles.categoriesSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Categories
+          </Text>
+          <FlatList
+            data={categories}
+            renderItem={renderCategoryItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesList}
           />
-        )}
-      </View>
+        </View>
+
+        {/* Exercises List */}
+        <View style={styles.exercisesSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            {categories.find((c) => c.muscle === selectedCategory)?.name} Exercises
+          </Text>
+
+          {isLoading ? (
+            <Loading />
+          ) : error ? (
+            <ErrorView
+              message="Failed to load exercises. Please try again."
+              onRetry={refetch}
+            />
+          ) : (
+            <FlatList
+              data={exercises}
+              renderItem={renderExerciseItem}
+              keyExtractor={(item, index) => `${item.name}-${index}`}
+              numColumns={2}
+              columnWrapperStyle={styles.exerciseRow}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.exercisesList}
+              scrollEnabled={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Feather name="inbox" size={64} color={colors.textLight} />
+                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                    No exercises found
+                  </Text>
+                </View>
+              }
+            />
+          )}
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -188,67 +202,65 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
     paddingTop: 60,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   greeting: {
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: '500',
   },
   userName: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginTop: 4,
+    fontSize: 28,
+    fontWeight: '800',
+    marginTop: 6,
+    letterSpacing: -0.5,
   },
   profileCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileInitial: {
     color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
   },
   categoriesSection: {
-    marginTop: 20,
+    marginTop: 24,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginLeft: 20,
-    marginBottom: 12,
+    fontSize: 22,
+    fontWeight: '800',
+    marginLeft: 24,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   categoriesList: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   categoryCard: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 14,
+    borderRadius: 16,
     marginRight: 12,
-    borderWidth: 1,
+    borderWidth: 1.5,
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   categoryName: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
   },
   exercisesSection: {
     flex: 1,
-    marginTop: 24,
+    marginTop: 28,
   },
   exerciseRow: {
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   exercisesList: {
     paddingBottom: 20,
@@ -262,5 +274,58 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     marginTop: 16,
+  },
+  tipSection: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 12,
+  },
+  tipCard: {
+    padding: 24,
+    borderRadius: 24,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  tipHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  tipIconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tipBadge: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+  },
+  tipBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  tipTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 10,
+    letterSpacing: -0.3,
+  },
+  tipDescription: {
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.95)',
+    lineHeight: 22,
+    fontWeight: '500',
   },
 });

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -23,6 +23,7 @@ export const Input: React.FC<InputProps> = ({
   icon,
   isPassword = false,
   style,
+  secureTextEntry,
   ...props
 }) => {
   const { colors } = useTheme();
@@ -57,7 +58,7 @@ export const Input: React.FC<InputProps> = ({
             style,
           ]}
           placeholderTextColor={colors.textLight}
-          secureTextEntry={isPassword && !showPassword}
+          secureTextEntry={isPassword ? !showPassword : secureTextEntry}
           {...props}
         />
         {isPassword && (

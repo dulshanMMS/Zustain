@@ -66,8 +66,7 @@ export const RootNavigator: React.FC = () => {
               name="ExerciseDetails" 
               component={ExerciseDetailsScreen}
               options={{
-                presentation: 'card',
-                animation: 'slide_from_right',
+                headerShown: false,
               }}
             />
           </>

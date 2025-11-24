@@ -13,13 +13,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { exerciseApi } from '../features/exercises/exerciseApi';
 import authReducer from '../features/auth/authSlice';
 import favoritesReducer from '../features/favorites/favoritesSlice';
+import waterReducer from '../features/water/waterSlice';
 
 // Persist config
 const persistConfig = {
   key: 'root',
   version: 1,
   storage: AsyncStorage,
-  whitelist: ['auth', 'favorites'], // Only persist auth and favorites
+  whitelist: ['auth', 'favorites', 'water'], // Persist auth, favorites, and water
 };
 
 // Combine reducers
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   [exerciseApi.reducerPath]: exerciseApi.reducer,
   auth: authReducer,
   favorites: favoritesReducer,
+  water: waterReducer,
 });
 
 // Create persisted reducer

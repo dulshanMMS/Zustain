@@ -12,15 +12,14 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../../theme/ThemeContext';
-import { Input } from '../../components/Input';
-import { Button } from '../../components/Button';
-import { registerSchema } from '../../utils/validation';
-import { authService } from '../../features/auth/authService';
-import { authStorage } from '../../features/auth/authStorage';
-import { useAppDispatch } from '../../store/hooks';
-import { setCredentials } from '../../features/auth/authSlice';
-import { AuthStackParamList } from '../../types';
+import { useTheme } from '../theme';
+import { Input, Button } from '../components';
+import { registerSchema } from '../utils/validation';
+import { authService } from '../features/auth/authService';
+import { authStorage } from '../features/auth/authStorage';
+import { useAppDispatch } from '../store/hooks';
+import { setCredentials } from '../features/auth/authSlice';
+import { AuthStackParamList } from '../types';
 import { Feather } from '@expo/vector-icons';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
@@ -73,7 +72,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRe
       });
 
       // Save token securely
-      await authStorage.saveToken(response.token);
+      await authStorage.saveToken(String(response.token));
       await authStorage.saveUser(JSON.stringify(response));
 
       // Update Redux state

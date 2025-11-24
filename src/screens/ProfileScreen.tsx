@@ -9,11 +9,12 @@ import {
   Alert,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { logout } from '../../features/auth/authSlice';
-import { clearFavorites } from '../../features/favorites/favoritesSlice';
-import { authStorage } from '../../features/auth/authStorage';
+import { useTheme } from '../theme';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logout } from '../features/auth/authSlice';
+import { clearFavorites } from '../features/favorites/favoritesSlice';
+import { addWater, removeWater } from '../features/water/waterSlice';
+import { authStorage } from '../features/auth/authStorage';
 
 interface ProfileScreenProps {
   onLogout: () => void;
@@ -24,6 +25,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state: any) => state.auth.user);
   const favoritesCount = useAppSelector((state: any) => state.favorites.items.length);
+  const waterData = useAppSelector((state: any) => state.water);
+  
+  const waterPercentage = Math.min((waterData.consumed / waterData.dailyGoal) * 100, 100);
+  const glassesConsumed = Math.floor(waterData.consumed / 250); // 250ml per glass
+  const totalGlasses = Math.ceil(waterData.dailyGoal / 250);
+
+  const handleAddWater = (amount: number) => {
+    dispatch(addWater(amount));
+  };
+
+  const handleRemoveWater = () => {
+    dispatch(removeWater(250));
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -98,6 +112,77 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
           </View>
         </View>
 
+        {/* Water Intake Tracker */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Water Intake</Text>
+          
+          <View style={[styles.waterCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            {/* Header */}
+            <View style={styles.waterHeader}>
+              <View style={styles.waterHeaderLeft}>
+                <View style={[styles.waterIcon, { backgroundColor: colors.info + '20' }]}>
+                  <Feather name="droplet" size={24} color={colors.info} />
+                </View>
+                <View>
+                  <Text style={[styles.waterTitle, { color: colors.text }]}>Daily Goal</Text>
+                  <Text style={[styles.waterSubtitle, { color: colors.textSecondary }]}>
+                    {glassesConsumed} of {totalGlasses} glasses
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.waterAmount, { color: colors.info }]}>
+                {waterData.consumed}ml
+              </Text>
+            </View>
+
+            {/* Progress Bar */}
+            <View style={[styles.progressBarContainer, { backgroundColor: colors.border }]}>
+              <View 
+                style={[
+                  styles.progressBarFill, 
+                  { 
+                    backgroundColor: colors.info,
+                    width: `${waterPercentage}%` 
+                  }
+                ]}
+              />
+            </View>
+            <Text style={[styles.progressText, { color: colors.textSecondary }]}>
+              {Math.round(waterPercentage)}% of daily goal
+            </Text>
+
+            {/* Quick Add Buttons */}
+            <View style={styles.waterActions}>
+              <TouchableOpacity
+                style={[styles.waterButton, { backgroundColor: colors.info + '15', borderColor: colors.info }]}
+                onPress={() => handleAddWater(250)}
+              >
+                <Feather name="plus" size={18} color={colors.info} />
+                <Text style={[styles.waterButtonText, { color: colors.info }]}>Glass</Text>
+                <Text style={[styles.waterButtonSubtext, { color: colors.info }]}>250ml</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.waterButton, { backgroundColor: colors.info + '15', borderColor: colors.info }]}
+                onPress={() => handleAddWater(500)}
+              >
+                <Feather name="plus" size={18} color={colors.info} />
+                <Text style={[styles.waterButtonText, { color: colors.info }]}>Bottle</Text>
+                <Text style={[styles.waterButtonSubtext, { color: colors.info }]}>500ml</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.waterButton, { backgroundColor: colors.error + '15', borderColor: colors.error }]}
+                onPress={handleRemoveWater}
+                disabled={waterData.consumed === 0}
+              >
+                <Feather name="minus" size={18} color={waterData.consumed === 0 ? colors.textLight : colors.error} />
+                <Text style={[styles.waterButtonText, { color: waterData.consumed === 0 ? colors.textLight : colors.error }]}>Undo</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
         {/* Settings Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Preferences</Text>
@@ -118,7 +203,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
               value={isDark}
               onValueChange={toggleTheme}
               trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={colors.white}
+              ios_backgroundColor={colors.border}
             />
           </View>
         </View>
@@ -180,77 +265,77 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 40,
+    paddingBottom: 48,
     alignItems: 'center',
   },
   profileImageContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   profileImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+    borderWidth: 4,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   profileInitial: {
-    fontSize: 40,
-    fontWeight: '700',
+    fontSize: 48,
+    fontWeight: '800',
   },
   userName: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 28,
+    fontWeight: '800',
     color: '#FFFFFF',
-    marginBottom: 4,
+    marginBottom: 6,
+    letterSpacing: -0.5,
   },
   userEmail: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '500',
   },
   statsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginTop: -20,
-    gap: 12,
+    paddingHorizontal: 24,
+    marginTop: -24,
+    gap: 14,
   },
   statCard: {
     flex: 1,
-    padding: 16,
-    borderRadius: 16,
+    padding: 20,
+    borderRadius: 20,
     alignItems: 'center',
     borderWidth: 1,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginTop: 8,
+    fontSize: 28,
+    fontWeight: '800',
+    marginTop: 10,
   },
   statLabel: {
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: 13,
+    marginTop: 6,
+    fontWeight: '600',
   },
   section: {
-    marginTop: 24,
-    paddingHorizontal: 20,
+    marginTop: 28,
+    paddingHorizontal: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 16,
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 16,
+    padding: 18,
+    borderRadius: 18,
     borderWidth: 1,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -258,38 +343,116 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
   settingTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
   settingSubtitle: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 13,
+    marginTop: 3,
+    fontWeight: '500',
   },
   actionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
+    padding: 18,
+    borderRadius: 18,
     borderWidth: 1,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   actionContent: {
     flex: 1,
   },
   appInfo: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: 40,
   },
   appInfoText: {
-    fontSize: 12,
-    marginBottom: 4,
+    fontSize: 13,
+    marginBottom: 6,
+    fontWeight: '500',
+  },
+  waterCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+  },
+  waterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  waterHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  waterIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  waterTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  waterSubtitle: {
+    fontSize: 13,
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  waterAmount: {
+    fontSize: 28,
+    fontWeight: '800',
+  },
+  progressBarContainer: {
+    height: 10,
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  progressText: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 20,
+    fontWeight: '600',
+  },
+  waterActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  waterButton: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waterButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 6,
+  },
+  waterButtonSubtext: {
+    fontSize: 11,
+    marginTop: 3,
+    fontWeight: '600',
   },
 });

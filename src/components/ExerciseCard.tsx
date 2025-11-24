@@ -7,7 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../theme';
 import { Exercise } from '../types';
 import { formatDifficulty, formatMuscleName, truncateText } from '../utils/helpers';
 
@@ -69,7 +69,6 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             name="heart"
             size={18}
             color={isFavorite ? colors.error : colors.textLight}
-            fill={isFavorite ? colors.error : 'transparent'}
           />
         </TouchableOpacity>
       )}
@@ -131,61 +130,54 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     width: cardWidth,
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 20,
+    padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   favoriteButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    top: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   content: {
-    marginTop: 4,
+    marginTop: 6,
   },
   difficultyBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
     alignSelf: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   difficultyText: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
     textTransform: 'capitalize',
+    letterSpacing: 0.3,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 8,
-    minHeight: 38,
+    fontSize: 17,
+    fontWeight: '800',
+    marginBottom: 12,
+    minHeight: 42,
+    lineHeight: 22,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   infoText: {
-    fontSize: 12,
-    marginLeft: 6,
+    fontSize: 13,
+    marginLeft: 8,
     textTransform: 'capitalize',
+    fontWeight: '500',
   },
 });

@@ -10,12 +10,12 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-import { useTheme } from '../../theme/ThemeContext';
-import { Button } from '../../components/Button';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { toggleFavorite } from '../../features/favorites/favoritesSlice';
-import { RootStackParamList } from '../../types';
-import { formatDifficulty, formatMuscleName, generateExerciseId } from '../../utils/helpers';
+import { useTheme } from '../theme';
+import { Button } from '../components';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { toggleFavorite } from '../features/favorites/favoritesSlice';
+import { RootStackParamList } from '../types';
+import { formatDifficulty, formatMuscleName, generateExerciseId } from '../utils/helpers';
 
 type ExerciseDetailsNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ExerciseDetails'>;
 type ExerciseDetailsRouteProp = RouteProp<RootStackParamList, 'ExerciseDetails'>;
@@ -58,20 +58,20 @@ export const ExerciseDetailsScreen: React.FC<ExerciseDetailsScreenProps> = ({ na
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
         <TouchableOpacity
-          style={[styles.backButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
+          style={[styles.backButton, { backgroundColor: 'rgba(255,255,255,0.25)' }]}
           onPress={() => navigation.goBack()}
         >
           <Feather name="arrow-left" size={24} color="#FFFFFF" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Exercise Details</Text>
         <TouchableOpacity
-          style={[styles.favoriteButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
+          style={[styles.favoriteButton, { backgroundColor: isFavorite ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.25)' }]}
           onPress={handleToggleFavorite}
         >
           <Feather
-            name="heart"
+            name={isFavorite ? 'heart' : 'heart'}
             size={24}
-            color="#FFFFFF"
-            fill={isFavorite ? '#FFFFFF' : 'transparent'}
+            color={isFavorite ? colors.error : '#FFFFFF'}
           />
         </TouchableOpacity>
       </View>
@@ -160,11 +160,18 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 50,
-    paddingBottom: 20,
+    paddingBottom: 24,
     paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    flex: 1,
+    textAlign: 'center',
   },
   backButton: {
     width: 44,
@@ -187,81 +194,84 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   titleSection: {
-    padding: 20,
-    paddingTop: 0,
+    padding: 24,
+    paddingTop: 20,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 12,
+    fontSize: 32,
+    fontWeight: '800',
+    marginBottom: 16,
+    letterSpacing: -0.5,
   },
   difficultyBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 24,
     alignSelf: 'flex-start',
   },
   difficultyText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     textTransform: 'capitalize',
+    letterSpacing: 0.5,
   },
   infoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 20,
-    gap: 12,
+    paddingHorizontal: 24,
+    gap: 16,
   },
   infoCard: {
-    width: (width - 52) / 2,
-    padding: 16,
-    borderRadius: 16,
+    width: (width - 64) / 2,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
     alignItems: 'center',
   },
   iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   infoLabel: {
-    fontSize: 12,
-    marginBottom: 4,
+    fontSize: 13,
+    marginBottom: 6,
+    fontWeight: '500',
   },
   infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     textAlign: 'center',
     textTransform: 'capitalize',
   },
   instructionsSection: {
-    padding: 20,
-    marginTop: 8,
+    padding: 24,
+    marginTop: 12,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginLeft: 8,
+    fontSize: 22,
+    fontWeight: '800',
+    marginLeft: 12,
   },
   instructionsCard: {
-    padding: 16,
-    borderRadius: 16,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
   },
   instructionsText: {
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: 26,
   },
   actionSection: {
-    paddingHorizontal: 20,
-    marginTop: 12,
+    paddingHorizontal: 24,
+    marginTop: 16,
   },
 });

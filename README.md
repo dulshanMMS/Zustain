@@ -13,7 +13,9 @@ A comprehensive React Native mobile application for tracking exercises and manag
 Zustain is a cross-platform mobile application that helps users:
 - 🏋️ Browse and discover exercises by muscle group
 - ❤️ Save favorite exercises for quick access
-- 📊 Track workout routines
+- 💧 Track daily water intake with interactive goals
+- 💡 Discover daily wellness tips for healthy living
+- 📊 Monitor workout progress and statistics
 - 🌙 Enjoy seamless experience with dark mode
 - 🔐 Secure authentication and data persistence
 
@@ -74,6 +76,11 @@ Zustain is a cross-platform mobile application that helps users:
 
 ### Bonus Feature (5 marks)
 - ✅ **Dark Mode Toggle** - Fully functional with persistent preference
+
+### Additional Features (Beyond Requirements)
+- ✅ **Water Intake Tracker** - Interactive daily water tracking with progress visualization
+- ✅ **Wellness Tips** - Daily rotating wellness tips with fitness, nutrition, and mental health advice
+- ✅ **Enhanced UI/UX** - Beautiful card-based design optimized for mobile interaction
 
 ---
 
@@ -162,8 +169,13 @@ Zustain/
 │   │   │   └── authStorage.ts     # Secure token storage
 │   │   ├── exercises/      # Exercise feature
 │   │   │   └── exerciseApi.ts     # RTK Query API for exercises
-│   │   └── favorites/      # Favorites feature
-│   │       └── favoritesSlice.ts  # Redux slice for favorites
+│   │   ├── favorites/      # Favorites feature
+│   │   │   └── favoritesSlice.ts  # Redux slice for favorites
+│   │   └── water/          # Water tracking feature
+│   │       └── waterSlice.ts      # Redux slice for water intake
+│   │
+│   ├── data/              # Static data and content
+│   │   └── wellnessTips.ts   # Wellness tips database
 │   │
 │   ├── navigation/         # Navigation configuration
 │   │   ├── AuthNavigator.tsx      # Auth stack navigator
@@ -234,6 +246,22 @@ Zustain/
 - **Persistent Preference:** Remembers user choice
 - **Smooth Transition:** Animated color changes
 - **Complete Coverage:** All screens support dark mode
+
+### 6. Water Intake Tracking (Bonus)
+- **Daily Goal:** Track progress towards 2000ml daily goal
+- **Quick Add:** One-tap buttons for glass (250ml) or bottle (500ml)
+- **Progress Bar:** Visual representation of daily water consumption
+- **Glass Counter:** Shows glasses consumed out of daily target
+- **Undo Function:** Remove last water entry if added by mistake
+- **Auto Reset:** Automatically resets each day
+- **Persistent Data:** Water intake saved and survives app restart
+
+### 7. Wellness Tips (Bonus)
+- **Tip of the Day:** Rotating daily wellness advice based on date
+- **Categories:** Fitness, nutrition, mental health, hydration, and sleep tips
+- **12 Curated Tips:** Expert advice for healthy living
+- **Beautiful Card:** Prominent display on home screen with icon
+- **Color-coded:** Matches app's primary theme color
 
 ---
 

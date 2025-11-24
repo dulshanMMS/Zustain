@@ -8,11 +8,11 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
-import { useTheme } from '../../theme/ThemeContext';
-import { ExerciseCard } from '../../components/ExerciseCard';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { toggleFavorite, clearFavorites } from '../../features/favorites/favoritesSlice';
-import { RootStackParamList, FavoriteExercise } from '../../types';
+import { useTheme } from '../theme';
+import { ExerciseCard } from '../components';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { toggleFavorite, clearFavorites } from '../features/favorites/favoritesSlice';
+import { RootStackParamList, FavoriteExercise } from '../types';
 import { Alert } from 'react-native';
 
 type FavoritesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
